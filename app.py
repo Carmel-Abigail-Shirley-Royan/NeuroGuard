@@ -62,22 +62,30 @@ def emergency_alert():
     lon = data.get("lon")
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    maps_link = f"https://maps.google.com/?q={lat},{lon}"
+
     print(f"\n🚨 Emergency Alert Received!")
     print(f"👤 User: {user}")
     print(f"📍 Location: Latitude={lat}, Longitude={lon}")
     print(f"🕒 Time: {timestamp}")
+    print(f"📌 Google Maps: {maps_link}")
 
     return jsonify({
         "status": "Emergency Received",
+        "user": user,
         "location": {"lat": lat, "lon": lon},
+        "maps_link": maps_link,
         "time": timestamp
     })
 
 # Optional internal model test
-test_data = np.array([[60, 36.5, 98, 0.1]])
-test_scaled = scaler.transform(test_data)
-test_pred = rf_model.predict(test_scaled)
-print("\n🔍 Test Prediction (Normal Input):", test_pred)
+try:
+    test_data = np.array([[60, 36.5, 98, 0.1]])
+    test_scaled = scaler.transform(test_data)
+    test_pred = rf_model.predict(test_scaled)
+    print("\n🔍 Test Prediction (Normal Input):", test_pred)
+except Exception as e:
+    print("⚠️ Test prediction failed:", e)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
