@@ -1,17 +1,14 @@
 from flask import Flask, request, jsonify
 import pandas as pd
+from email_alert import send_email_alert
 import joblib
 import traceback
 import numpy as np
-import os
-from dotenv import load_dotenv
 from flask_cors import CORS
 from datetime import datetime
 
-load_dotenv()
-
 app = Flask(__name__)
-CORS(app)  # Allow requests from any frontend
+CORS(app)  # Enable CORS for all routes
 
 # Load trained model and scaler
 try:
@@ -37,7 +34,6 @@ def upload_file():
         data = pd.read_csv(file)
         print("\n🟢 Uploaded Data:\n", data.head())
 
-        # Check feature count
         expected = scaler.n_features_in_
         if data.shape[1] != expected:
             return jsonify({"error": f"Expected {expected} features, got {data.shape[1]}"}), 400
@@ -60,6 +56,7 @@ def emergency_alert():
     user = data.get("user", "Unknown")
     lat = data.get("lat")
     lon = data.get("lon")
+    doctor_email = data.get("doctor_email", "doctor@example.com")
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     maps_link = f"https://www.google.com/maps?q={lat},{lon}"
@@ -68,13 +65,24 @@ def emergency_alert():
     print(f"👤 User: {user}")
     print(f"📍 Location: Latitude={lat}, Longitude={lon}")
     print(f"🕒 Time: {timestamp}")
-    print(f"🗺️ Google Maps Link: {maps_link}")
+    print(f"✉️ Doctor Email: {doctor_email}")
+    print(f"🌍 Maps Link: {maps_link}")
 
-    # 🔔 Optional: Send this link via email or WhatsApp to the doctor
+    # 🔔 Send email
+    send_email_alert(user, maps_link, doctor_email)
 
     return jsonify({
         "status": "Emergency Received",
         "location": {"lat": lat, "lon": lon},
-        "maps_link": maps_link,
-        "time": timestamp
+        "time": timestamp,
+        "maps_link": maps_link
     })
+
+# Optional model sanity test
+test_data = np.array([[60, 36.5, 98, 0.1]])
+test_scaled = scaler.transform(test_data)
+test_pred = rf_model.predict(test_scaled)
+print("\n🔍 Test Prediction (Normal Input):", test_pred)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
