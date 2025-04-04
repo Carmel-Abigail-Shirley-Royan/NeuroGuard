@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from flask_cors import CORS
 from datetime import datetime
+load_dotenv()
 
 # Optional: Uncomment if using Twilio for SMS
 # from twilio.rest import Client
@@ -70,11 +71,15 @@ def emergency_alert():
     print(f"👤 User: {user}")
     print(f"📍 Location: Latitude={lat}, Longitude={lon}")
     print(f"🕒 Time: {timestamp}")
-    load_dotenv()
 
     # Optional: Send SMS using Twilio (uncomment and set credentials to use)
     account_sid = os.getenv("TWILIO_SID")
     auth_token = os.getenv("TWILIO_TOKEN")
+
+    if not account_sid or not auth_token:
+        print("❌ Missing Twilio credentials in environment variables.")
+        return jsonify({"error": "Missing Twilio credentials"}), 500
+
     
 
     client = Client(account_sid, auth_token)
