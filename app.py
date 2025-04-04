@@ -4,6 +4,10 @@ import joblib
 import traceback
 from twilio.rest import Client
 import numpy as np
+import os
+from dotenv import load_dotenv
+
+
 from flask_cors import CORS
 from datetime import datetime
 
@@ -66,11 +70,13 @@ def emergency_alert():
     print(f"👤 User: {user}")
     print(f"📍 Location: Latitude={lat}, Longitude={lon}")
     print(f"🕒 Time: {timestamp}")
+    load_dotenv()
 
     # Optional: Send SMS using Twilio (uncomment and set credentials to use)
+    account_sid = os.getenv("TWILIO_SID")
+    auth_token = os.getenv("TWILIO_TOKEN")
     
-    account_sid = "ACbf48332cb788f5dd20dce8ad016e7030"
-    auth_token = "de4946e0548aeaf5409c227a1f768493"
+
     client = Client(account_sid, auth_token)
 
     message = client.messages.create(
