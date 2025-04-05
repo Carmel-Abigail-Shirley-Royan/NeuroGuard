@@ -55,12 +55,12 @@ def upload_file():
         user = request.form.get("user", "Unknown")
         data_json = data.to_dict(orient="records")
         supabase.table("seizure_logs").insert({
-            "id": str(uuid.uuid4()),
-            "timestamp": datetime.now().isoformat(),
             "user": user,
+            "timestamp": datetime.now().isoformat(),
             "data": data_json,
             "prediction": result[0] if len(result) == 1 else json.dumps(result)
         }).execute()
+
 
         return jsonify({"predictions": result})
 
