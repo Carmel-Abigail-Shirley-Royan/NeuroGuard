@@ -52,6 +52,7 @@ def upload_file():
 
 @app.route('/emergency', methods=['POST'])
 def emergency_alert():
+    
     data = request.get_json()
     user = data.get("user", "Unknown")
     lat = data.get("lat")
@@ -59,6 +60,8 @@ def emergency_alert():
     doctor_email = data.get("doctor_email")
     sender_email = data.get("sender_email")
     sender_password = data.get("sender_password")
+    
+
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     maps_link = f"https://www.google.com/maps?q={lat},{lon}"
