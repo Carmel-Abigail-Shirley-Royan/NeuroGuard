@@ -56,7 +56,9 @@ def emergency_alert():
     user = data.get("user", "Unknown")
     lat = data.get("lat")
     lon = data.get("lon")
-    doctor_email = data.get("doctor_email", "doctor@example.com")
+    doctor_email = data.get("doctor_email")
+    sender_email = data.get("sender_email")
+    sender_password = data.get("sender_password")
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     maps_link = f"https://www.google.com/maps?q={lat},{lon}"
@@ -64,12 +66,13 @@ def emergency_alert():
     print(f"\n🚨 Emergency Alert Received!")
     print(f"👤 User: {user}")
     print(f"📍 Location: Latitude={lat}, Longitude={lon}")
-    print(f"🕒 Time: {timestamp}")
     print(f"✉️ Doctor Email: {doctor_email}")
+    print(f"📨 Sender Email: {sender_email}")
+    print(f"🕒 Time: {timestamp}")
     print(f"🌍 Maps Link: {maps_link}")
 
-    # 🔔 Send email
-    send_email_alert(user, maps_link, doctor_email)
+    # 🔔 Send email using user's credentials
+    send_email_alert(user, maps_link, doctor_email, sender_email, sender_password)
 
     return jsonify({
         "status": "Emergency Received",
@@ -77,6 +80,7 @@ def emergency_alert():
         "time": timestamp,
         "maps_link": maps_link
     })
+
 
 # Optional model sanity test
 test_data = np.array([[60, 36.5, 98, 0.1]])
