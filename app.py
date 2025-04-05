@@ -6,6 +6,13 @@ import traceback
 import numpy as np
 from flask_cors import CORS
 from datetime import datetime
+from supabase import create_client, Client
+import uuid
+import json
+
+SUPABASE_URL = "https://epshgdazsrsfgwhzfspq.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwc2hnZGF6c3JzZmd3aHpmc3BxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjQ3MzQsImV4cCI6MjA1OTQwMDczNH0.DkkCugQZZHpTeHYAOWdnL1BO-h6j2ZXJmqg45eIwIb8"
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -44,6 +51,17 @@ def upload_file():
         result = ["Seizure Detected" if p == 1 else "No Seizure Detected" for p in y_pred]
         print("\n🧠 Prediction:", result)
 
+        # ✅ Save to Supabase
+        user = request.form.get("user", "Unknown")
+        data_json = data.to_dict(orient="records")
+        supabase.table("seizure_logs").insert({
+            "id": str(uuid.uuid4()),
+            "timestamp": datetime.now().isoformat(),
+            "user": user,
+            "data": data_json,
+            "prediction": result[0] if len(result) == 1 else json.dumps(result)
+        }).execute()
+
         return jsonify({"predictions": result})
 
     except Exception as e:
@@ -52,7 +70,7 @@ def upload_file():
 
 @app.route('/emergency', methods=['POST'])
 def emergency_alert():
-    
+
     data = request.get_json()
     user = data.get("user", "Unknown")
     lat = data.get("lat")
@@ -60,10 +78,8 @@ def emergency_alert():
     doctor_email = data.get("doctor_email")
     sender_email = data.get("sender_email")
     sender_password = data.get("sender_password")
-    
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
     maps_link = f"https://www.google.com/maps?q={lat},{lon}"
 
     print(f"\n🚨 Emergency Alert Received!")
@@ -83,7 +99,6 @@ def emergency_alert():
         "time": timestamp,
         "maps_link": maps_link
     })
-
 
 # Optional model sanity test
 test_data = np.array([[60, 36.5, 98, 0.1]])
